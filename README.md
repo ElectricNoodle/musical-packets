@@ -8,5 +8,5 @@ Then run:
 ```
 go get ./...
 go build
-./musical-packets -i <interface>
+sudo ./musical-packets -i <interface>
 ```
