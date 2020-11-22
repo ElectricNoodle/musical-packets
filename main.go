@@ -47,7 +47,7 @@ func main() {
 	defer util.Run()()
 
 	statsTime = 20
-	hostIP = getAddressInfo(*iface)
+	hostIP = getIPAddressInfo(*iface)
 
 	handle = initPCAPHandle(hostIP)
 	packetFlows = make(map[string]*PacketFlow)
@@ -60,6 +60,7 @@ func main() {
 
 }
 
+/*initPCAPHandle Configures any options/filters on the pcap handle then returns it for use. */
 func initPCAPHandle(ip net.IP) *pcap.Handle {
 
 	var err error
@@ -96,7 +97,8 @@ func initPCAPHandle(ip net.IP) *pcap.Handle {
 	return handle
 }
 
-func getAddressInfo(interfaceName string) net.IP {
+/*getIPAddressInfo returns the firsrt IP configured on the adapter specified. */
+func getIPAddressInfo(interfaceName string) net.IP {
 
 	i, err := net.InterfaceByName(interfaceName)
 
@@ -124,6 +126,9 @@ func getAddressInfo(interfaceName string) net.IP {
 
 }
 
+/* getPackets handles the main loop which pulls in packets from the network packet source passed in.
+   Also dumps out the packet flow map every so often.
+*/
 func getPackets(src gopacket.PacketDataSource, stats int) {
 
 	var dec gopacket.Decoder
@@ -173,6 +178,7 @@ func getPackets(src gopacket.PacketDataSource, stats int) {
 	}
 }
 
+/* processPacket parses the packet depending on which protocol it is and hands it to processFlow */
 func processPacket(packet gopacket.Packet, defragger *ip4defrag.IPv4Defragmenter) {
 
 	/* Handles defragmentation */
@@ -202,6 +208,9 @@ func processPacket(packet gopacket.Packet, defragger *ip4defrag.IPv4Defragmenter
 
 }
 
+/* processFlow Creates a unique key for each protocol type and either creates a new flow,
+   or finds an existing one. Probably could be tidied up a bit. Should probably store packets too.
+*/
 func processFlow(packet gopacket.Packet, ipv4 *layers.IPv4, layer gopacket.Layer, protocol string) {
 
 	var key1 string
